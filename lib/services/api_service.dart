@@ -1,20 +1,22 @@
 import 'dart:convert';
 import 'dart:developer';
-
-import 'package:attendance_project/constant/endpoint.dart';
-import 'package:attendance_project/models/batch_model.dart';
-import 'package:attendance_project/models/register_model.dart';
-import 'package:attendance_project/models/training_model.dart';
 import 'package:http/http.dart' as http;
+
+
+
+import '../constant/endpoint.dart';
+import '../models/batch_model.dart';
+import '../models/register_model.dart';
+import '../models/training_model.dart';
 
 class AuthAPI {
   static Future<RegisterModel> registerUser({
     required String email,
-    required String name,
+    String? name,
     required String password,
-    required String jenisKelamin, // 'L' / 'P'
-    required int batchId,
-    required int trainingId,
+    String? jenisKelamin, // 'L' / 'P'
+    int? batchId,
+    int? trainingId,
     String profilePhoto = "", // sementara kosong
   }) async {
     final url = Uri.parse(Endpoint.register);

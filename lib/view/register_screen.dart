@@ -203,7 +203,7 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                           },
                           validator: (value) {
                             if (value == null) {
-                              return "Pilih pelatihan";
+                              return "Pilih Kejuruan";
                             }
                             return null;
                           },

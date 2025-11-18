@@ -51,6 +51,8 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
   Future<void> _loadDropdownData() async {
     setState(() {
       isLoadingDropdown = true;
+      selectedTrainingId = null;
+      selectedBatchId = null;
     });
     try {
       final trainingList = await TrainingAPI.getTrainings();
@@ -183,7 +185,7 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                   buildTitle("Pelatihan"),
                   height(12),
                   isLoadingDropdown
-                      ? const Center(child: CircularProgressIndicator())
+                      ? Center(child: CircularProgressIndicator())
                       : DropdownButtonFormField<int>(
                           value: selectedTrainingId,
                           isExpanded: true,
@@ -327,11 +329,15 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                       const Text("Don't have an account?"),
                       TextButton(
                         onPressed: () {
-                          // TODO: ke halaman login / apapun
+                          Navigator.pushReplacementNamed(
+                            context,
+                            '/login_screen',
+                          );
                         },
                         child: const Text(
                           "Sign Up",
                           style: TextStyle(
+                            color: Colors.blue,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -377,10 +383,8 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
       height: double.infinity,
       width: double.infinity,
       decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage("assets/backgroundSlicing.jpeg"),
-          fit: BoxFit.cover,
-        ),
+        color: Color.fromARGB(255, 202, 216, 241),
+        // fit: BoxFit.cover,
       ),
     );
   }

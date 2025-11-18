@@ -29,6 +29,7 @@ class CustomTextField extends StatelessWidget {
       obscureText: isPassword ? obscure : false,
       validator: validator,
       decoration: InputDecoration(
+        fillColor: Colors.white,
         prefixIcon: Icon(icon),
         hintText: hint,
         suffixIcon: isPassword

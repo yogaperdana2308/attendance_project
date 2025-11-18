@@ -66,10 +66,12 @@ class BatchModelData {
   Map<String, dynamic> toJson() => {
     "id": id,
     "batch_ke": batchKe,
-    "start_date":
-        "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}",
-    "end_date":
-        "${endDate!.year.toString().padLeft(4, '0')}-${endDate!.month.toString().padLeft(2, '0')}-${endDate!.day.toString().padLeft(2, '0')}",
+    "start_date": startDate == null
+        ? null
+        : "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}",
+    "end_date": endDate == null
+        ? null
+        : "${endDate!.year.toString().padLeft(4, '0')}-${endDate!.month.toString().padLeft(2, '0')}-${endDate!.day.toString().padLeft(2, '0')}",
     "created_at": createdAt,
     "updated_at": updatedAt,
     "trainings": trainings == null

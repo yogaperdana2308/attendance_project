@@ -1,8 +1,8 @@
 class Endpoint {
-  static const baseUrl = 'https://example.com'; // SESUAIKAN
+  static const baseUrl = "https://appabsensi.mobileprojp.com/api";
 
-  static const register = '$baseUrl/api/register';
-  static const trainings = '$baseUrl/api/training'; // SESUAIKAN DENGAN BACKEND
-  static const trainingBatches =
-      '$baseUrl/api/batch'; // SESUAIKAN DENGAN BACKEND
+  static const register = '$baseUrl/register';
+  static const login = '$baseUrl/login';
+  static const trainings = '$baseUrl/trainings';
+  static const trainingBatches = '$baseUrl/batches';
 }

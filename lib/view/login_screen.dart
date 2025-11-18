@@ -1,10 +1,9 @@
 import 'package:attendance_project/services/api_service.dart';
-import 'package:attendance_project/view/dashboard.dart';
+import 'package:attendance_project/view/checkin_screen.dart';
 import 'package:attendance_project/view/register_screen.dart';
 import 'package:attendance_project/widget/custom_button.dart';
 import 'package:attendance_project/widget/textfield.dart';
 import 'package:flutter/material.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreenAttendence extends StatefulWidget {
@@ -28,7 +27,7 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
     setState(() => loading = true);
 
     try {
-      final result = await AuthAPI.registerUser(
+      final result = await AuthAPI.loginUser(
         email: emailC.text,
         password: passC.text,
       );
@@ -38,9 +37,7 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => DashboardScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => DashboardScreenAttendence()),
       );
     } catch (e) {
       ScaffoldMessenger.of(
@@ -67,8 +64,8 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
                   "Welcome Back!",
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
-                const Text("Login untuk melanjutkan"),
-                const SizedBox(height: 30),
+                Text("Login untuk melanjutkan"),
+                SizedBox(height: 72),
 
                 CustomTextField(
                   hint: 'example@gmail.com',
@@ -93,12 +90,14 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
                       v!.isEmpty ? "Password tidak boleh kosong" : null,
                 ),
 
-                const SizedBox(height: 30),
+                SizedBox(height: 30),
 
                 CustomButton(
-                  label: loading ? "Loading..." : "Login",
-                  isLoading: true,
-                  onPressed : () {loading ? null : handleLogin();}
+                  label: loading ? " " : "Login",
+                  isLoading: false,
+                  onPressed: () {
+                    loading ? null : handleLogin();
+                  },
                 ),
 
                 const SizedBox(height: 20),
@@ -107,12 +106,21 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const RegisterScreenAttendence()),
+                      MaterialPageRoute(
+                        builder: (_) => const RegisterScreenAttendence(),
+                      ),
                     );
                   },
-                  child: const Text(
-                    "Belum punya akun? Daftar",
-                    style: TextStyle(color: Colors.blue),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Belum punya akun?",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      SizedBox(width: 12),
+                      Text("Daftar", style: TextStyle(color: Colors.blue)),
+                    ],
                   ),
                 ),
               ],

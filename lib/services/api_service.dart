@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:attendance_project/models/attendence_model.dart';
+import 'package:attendance_project/preferences/preferences_handler.dart';
 import 'package:http/http.dart' as http;
 
 import '../constant/endpoint.dart';
@@ -117,6 +119,39 @@ class TrainingAPI {
       throw Exception(
         error["message"] ?? "Gagal mengambil data batch pelatihan",
       );
+    }
+  }
+
+  static Future<AttendenceModel> checkIn({
+    required String attendanceDate,
+    required String CheckInTime,
+    required double checkInLat,
+    required double checkInLng,
+    required String checkInAddress,
+    required String status,
+  }) async {
+    final String? token = await PreferenceHandler.getToken();
+    final url = Uri.parse(Endpoint.checkin);
+    final response = await http.post(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+      body: {
+        "attendance_date": attendanceDate,
+        "check_in": CheckInTime,
+        "check_in_lat": checkInLat.toString(),
+        "check_in_lng": checkInLng.toString(),
+        "check_in_address": checkInAddress,
+        "status": status,
+      },
+    );
+    print(response.body);
+    print(response.statusCode);
+    log(response.body);
+    if (response.statusCode == 200) {
+      return AttendenceModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"]);
     }
   }
 }

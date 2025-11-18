@@ -1,37 +1,80 @@
-// import 'package:flutter/material.dart';
+import 'package:attendance_project/view/checkin_screen.dart';
+import 'package:attendance_project/view/dashboard_screen.dart';
+import 'package:attendance_project/view/history_attendence.dart';
+import 'package:flutter/material.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 
-// class BottomNavigasi extends StatelessWidget {
-//   final int currentIndex;
-//   final Function(int) onTap;
+class Bottomnav extends StatefulWidget {
+  const Bottomnav({super.key});
 
-//   const BottomNavigasi({
-//     super.key,
-//     required this.currentIndex,
-//     required this.onTap,
-//   });
+  @override
+  State<Bottomnav> createState() => _BottomnavState();
+}
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return BottomNavigationBar(
-//       currentIndex: currentIndex,
-//       onTap: onTap,
-//       selectedItemColor: const Color(0xFF0A3D91),
-//       unselectedItemColor: Colors.grey,
-//       showUnselectedLabels: true,
-//       type: BottomNavigationBarType.fixed,
-//       items: const [
-//         BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-//         BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-//         BottomNavigationBarItem(
-//           icon: Icon(Icons.qr_code_scanner),
-//           label: "Scan",
-//         ),
-//         BottomNavigationBarItem(
-//           icon: Icon(Icons.calendar_today),
-//           label: "Kehadiran",
-//         ),
-//         BottomNavigationBarItem(icon: Icon(Icons.map), label: "Maps"),
-//       ],
-//     );
-//   }
-// }
+class _BottomnavState extends State<Bottomnav> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    DashboardScreenAttendence(),
+    HistoryAttendenceScreen(),
+    TakeAttendenceScreen(),
+    
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade100,
+      body: _pages[_currentIndex],
+
+      // Bottom Navigation menggunakan google_nav_bar
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.white,
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: GNav(
+            gap: 8,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            selectedIndex: _currentIndex,
+
+            // Warna
+            backgroundColor: Colors.white,
+            color: Colors.blue,          // icon normal
+            activeColor: Colors.blue,             // icon aktif
+            tabBackgroundColor: Colors.blue.shade50,
+            tabBorderRadius: 16,
+
+            onTabChange: (index) {
+              setState(() => _currentIndex = index);
+            },
+
+            tabs: [
+              GButton(
+                icon: Icons.home_outlined,
+                text: "Home",
+              ),
+
+              GButton(
+                icon: Icons.history_outlined,
+                text: "History",
+              ),
+              
+              GButton(
+                icon: Icons.fact_check_outlined,
+                text: "Kehadiran",
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

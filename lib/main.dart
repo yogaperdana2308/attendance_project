@@ -1,10 +1,13 @@
+import 'package:attendance_project/view/bottom_navigasi.dart';
 import 'package:attendance_project/view/checkin_screen.dart';
 import 'package:attendance_project/view/login_screen.dart';
 import 'package:attendance_project/view/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_file.dart';
 
 void main() {
-  runApp(MyApp());
+  // await initializeDateFormatting('id_ID', "");
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,8 +18,8 @@ class MyApp extends StatelessWidget {
       routes: {
         "/login_screen": (context) => LoginScreenAttendence(),
         "/register_screen": (context) => RegisterScreenAttendence(),
-        "/dashboard": (context) => DashboardScreenAttendence(),
-        // "/bottom_navigasi": (context) => BottomNavigasi(currentIndex: index),
+        "/dashboard": (context) => TakeAttendenceScreen(),
+        
       },
 
       title: 'E-Nventory',
@@ -25,7 +28,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
       ),
-      home: DashboardScreenAttendence(),
+      home: Bottomnav(),
     );
   }
 }

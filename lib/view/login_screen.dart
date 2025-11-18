@@ -37,7 +37,7 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => DashboardScreenAttendence()),
+        MaterialPageRoute(builder: (_) => TakeAttendenceScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(

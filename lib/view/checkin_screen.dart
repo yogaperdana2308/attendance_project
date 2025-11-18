@@ -7,14 +7,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-class DashboardScreenAttendence extends StatefulWidget {
-  const DashboardScreenAttendence({super.key});
+class TakeAttendenceScreen extends StatefulWidget {
+  const TakeAttendenceScreen({super.key});
 
   @override
-  State<DashboardScreenAttendence> createState() => _AttendanceScreenState();
+  State<TakeAttendenceScreen> createState() => _AttendanceScreenState();
 }
 
-class _AttendanceScreenState extends State<DashboardScreenAttendence> {
+class _AttendanceScreenState extends State<TakeAttendenceScreen> {
   bool isLoadingIn = false;
   GoogleMapController? mapsController;
   XFile? pickedImage;

@@ -29,7 +29,7 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
 
   final _formKey = GlobalKey<FormState>();
 
-  // --- state baru ---
+  // Dropdown State
   String? selectedGender; // 'L' / 'P'
   int? selectedTrainingId;
   int? selectedBatchId;
@@ -84,7 +84,6 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
           child: Center(
             child: SingleChildScrollView(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     "Hello, Welcome",
@@ -94,7 +93,7 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                   const Text("Register to access your account"),
                   height(24),
 
-                  // --- Email ---
+                  // EMAIL
                   buildTitle("Email Address"),
                   height(12),
                   buildTextField(
@@ -103,12 +102,9 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Email tidak boleh kosong";
-                      } else if (!value.contains('@')) {
-                        return "Email tidak valid";
-                      } else if (!RegExp(
-                        r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
-                      ).hasMatch(value)) {
-                        return "Format Email tidak valid";
+                      }
+                      if (!value.contains('@')) {
+                        return "Format email tidak valid";
                       }
                       return null;
                     },
@@ -116,7 +112,7 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
 
                   height(16),
 
-                  // --- Password ---
+                  // PASSWORD
                   buildTitle("Password"),
                   height(12),
                   buildTextField(
@@ -126,7 +122,8 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Password tidak boleh kosong";
-                      } else if (value.length < 6) {
+                      }
+                      if (value.length < 6) {
                         return "Password minimal 6 karakter";
                       }
                       return null;
@@ -135,59 +132,45 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
 
                   height(16),
 
-                  // --- Name ---
+                  // NAME
                   buildTitle("Name"),
                   height(12),
                   buildTextField(
                     hintText: "Enter your name",
                     controller: nameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Name tidak boleh kosong";
-                      }
-                      return null;
-                    },
+                    validator: (value) => value == null || value.isEmpty
+                        ? "Name tidak boleh kosong"
+                        : null,
                   ),
 
                   height(16),
 
-                  // --- Jenis Kelamin ---
+                  // GENDER
                   buildTitle("Jenis Kelamin"),
                   height(12),
                   DropdownButtonFormField<String>(
                     value: selectedGender,
-                    isExpanded: true,
                     decoration: _dropdownDecoration(),
                     items: genderOptions
                         .map(
-                          (g) => DropdownMenuItem<String>(
+                          (g) => DropdownMenuItem(
                             value: g['value'],
-                            child: Text(g['label'] ?? ''),
+                            child: Text(g['label']!),
                           ),
                         )
                         .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedGender = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Pilih jenis kelamin";
-                      }
-                      return null;
-                    },
+                    onChanged: (v) => setState(() => selectedGender = v),
+                    validator: (v) => v == null ? "Pilih jenis kelamin" : null,
                   ),
 
                   height(16),
 
-                  // --- Training ---
+                  // TRAINING
                   buildTitle("Pelatihan"),
                   height(12),
                   isLoadingDropdown
                       ? Center(child: CircularProgressIndicator())
                       : DropdownButtonFormField<int>(
-                          value: selectedTrainingId,
                           isExpanded: true,
                           decoration: _dropdownDecoration(),
                           items: trainings
@@ -198,29 +181,20 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                                 ),
                               )
                               .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedTrainingId = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return "Pilih Kejuruan";
-                            }
-                            return null;
-                          },
+                          onChanged: (v) =>
+                              setState(() => selectedTrainingId = v),
+                          validator: (v) => v == null ? "Pilih kejuruan" : null,
                         ),
 
                   height(16),
 
-                  // --- Batch ---
+                  // BATCH
                   buildTitle("Batch"),
                   height(12),
                   isLoadingDropdown
                       ? const Center(child: CircularProgressIndicator())
                       : DropdownButtonFormField<int>(
                           value: selectedBatchId,
-                          isExpanded: true,
                           decoration: _dropdownDecoration(),
                           items: batches
                               .map(
@@ -230,120 +204,100 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
                                 ),
                               )
                               .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedBatchId = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return "Pilih batch pelatihan";
-                            }
-                            return null;
-                          },
+                          onChanged: (v) => setState(() => selectedBatchId = v),
+                          validator: (v) => v == null ? "Pilih batch" : null,
                         ),
 
                   height(24),
 
-                  // --- Button Register ---
+                  // REGISTER BUTTON
                   CustomButton(
                     label: "Register",
                     isLoading: isLoading,
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        if (selectedGender == null ||
-                            selectedTrainingId == null ||
-                            selectedBatchId == null) {
-                          Fluttertoast.showToast(
-                            msg:
-                                "Jenis kelamin, pelatihan, dan batch harus dipilih",
-                          );
-                          return;
-                        }
+                      if (!_formKey.currentState!.validate()) return;
+
+                      if (selectedGender == null ||
+                          selectedTrainingId == null ||
+                          selectedBatchId == null) {
+                        Fluttertoast.showToast(msg: "Semua data harus dipilih");
+                        return;
+                      }
+
+                      setState(() => isLoading = true);
+
+                      try {
+                        final result = await AuthAPI.registerUser(
+                          email: emailController.text.trim(),
+                          name: nameController.text.trim(),
+                          password: passwordController.text,
+                          jenisKelamin: selectedGender!,
+                          batchId: selectedBatchId!,
+                          trainingId: selectedTrainingId!,
+                          profilePhoto: "",
+                        );
 
                         setState(() {
-                          isLoading = true;
+                          isLoading = false;
+                          user = result;
                         });
 
-                        try {
-                          final result = await AuthAPI.registerUser(
-                            email: emailController.text.trim(),
-                            name: nameController.text.trim(),
-                            password: passwordController.text,
-                            jenisKelamin: selectedGender!, // 'L' / 'P'
-                            batchId: selectedBatchId!,
-                            trainingId: selectedTrainingId!,
-                            profilePhoto: "", // nanti bisa diisi base64
-                          );
-
-                          setState(() {
-                            isLoading = false;
-                            user = result;
-                          });
-
-                          // contoh: simpan token kalau ada
-                          if (user.data?.token != null) {
-                            await PreferenceHandler.saveToken(
-                              user.data!.token!,
-                            );
-                          }
-                        } catch (e) {
-                          Fluttertoast.showToast(msg: e.toString());
-                          setState(() {
-                            isLoading = false;
-                          });
+                        // SIMPAN TOKEN
+                        if (user.data?.token != null) {
+                          await PreferenceHandler.saveToken(user.data!.token!);
                         }
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text("Validation Error"),
-                              content: const Text("Please fill all fields"),
-                              actions: [
-                                TextButton(
-                                  child: const Text("OK"),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                TextButton(
-                                  child: const Text("Ga OK"),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+
+                        // SAVE NAME & EMAIL
+                        await PreferenceHandler.saveUsername(
+                          nameController.text.trim(),
                         );
+                        await PreferenceHandler.saveEmail(
+                          emailController.text.trim(),
+                        );
+
+                        // SAVE TRAINING NAME
+                        final selectedTrainingName =
+                            trainings
+                                .firstWhere((t) => t.id == selectedTrainingId)
+                                .title ??
+                            "";
+
+                        // SAVE BATCH NAME
+                        final selectedBatchName =
+                            batches
+                                .firstWhere((b) => b.id == selectedBatchId)
+                                .batchKe ??
+                            "";
+
+                        // SAVE TO PREFERENCES
+                        await PreferenceHandler.saveTraining(
+                          selectedTrainingName,
+                        );
+                        await PreferenceHandler.saveBatch(selectedBatchName);
+
+                        Fluttertoast.showToast(msg: "Register berhasil!");
+
+                        Navigator.pushReplacementNamed(
+                          context,
+                          '/login_screen',
+                        );
+                      } catch (e) {
+                        Fluttertoast.showToast(msg: e.toString());
+                        setState(() => isLoading = false);
                       }
                     },
                   ),
 
-                  height(16),
+                  height(20),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Don't have an account?"),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            '/login_screen',
-                          );
-                        },
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/login_screen');
+                    },
+                    child: const Text(
+                      "Sudah punya akun? Login",
+                      style: TextStyle(color: Colors.blue),
+                    ),
                   ),
                 ],
               ),
@@ -354,25 +308,21 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
     );
   }
 
+  // ========================== UI SUPPORT WIDGETS ==========================
+
   InputDecoration _dropdownDecoration() {
     return InputDecoration(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(32),
-        borderSide: BorderSide(
-          color: Colors.black.withOpacity(0.2),
-          width: 1.0,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(32),
-        borderSide: const BorderSide(color: Colors.black, width: 1.0),
+        borderSide: BorderSide(color: Colors.black.withOpacity(0.2)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(32),
-        borderSide: BorderSide(
-          color: Colors.black.withOpacity(0.2),
-          width: 1.0,
-        ),
+        borderSide: BorderSide(color: Colors.black.withOpacity(0.2)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(32),
+        borderSide: const BorderSide(color: Colors.black),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
@@ -380,12 +330,9 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
 
   Container buildBackground() {
     return Container(
-      height: double.infinity,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Color.fromARGB(255, 202, 216, 241),
-        // fit: BoxFit.cover,
-      ),
+      height: double.infinity,
+      color: const Color.fromARGB(255, 202, 216, 241),
     );
   }
 
@@ -401,24 +348,7 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
       obscureText: isPassword ? isVisibility : false,
       decoration: InputDecoration(
         hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(32),
-          borderSide: BorderSide(
-            color: Colors.black.withOpacity(0.2),
-            width: 1.0,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(32),
-          borderSide: const BorderSide(color: Colors.black, width: 1.0),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(32),
-          borderSide: BorderSide(
-            color: Colors.black.withOpacity(0.2),
-            width: 1.0,
-          ),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32)),
         suffixIcon: isPassword
             ? IconButton(
                 onPressed: () {
@@ -435,20 +365,9 @@ class _RegisterScreenAttendenceState extends State<RegisterScreenAttendence> {
     );
   }
 
-  SizedBox height(double height) => SizedBox(height: height);
-  SizedBox width(double width) => SizedBox(width: width);
+  SizedBox height(double value) => SizedBox(height: value);
 
   Widget buildTitle(String text) {
-    return Row(
-      children: [
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 12,
-            // color: AppColor.gray88,
-          ),
-        ),
-      ],
-    );
+    return Row(children: [Text(text, style: const TextStyle(fontSize: 12))]);
   }
 }

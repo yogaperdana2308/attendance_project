@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:attendance_project/models/attendence_model.dart';
+import 'package:attendance_project/models/attedance_history.dart';
+import 'package:attendance_project/models/check_in.dart';
+import 'package:attendance_project/models/stats_model.dart';
 import 'package:attendance_project/preferences/preferences_handler.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,16 +13,18 @@ import '../models/register_model.dart';
 import '../models/training_model.dart';
 
 class AuthAPI {
+  // ================== REGISTER ==================
   static Future<RegisterModel> registerUser({
     required String email,
     String? name,
     required String password,
-    String? jenisKelamin, // 'L' / 'P'
+    String? jenisKelamin,
     int? batchId,
     int? trainingId,
-    String profilePhoto = "", // sementara kosong
+    String profilePhoto = "",
   }) async {
     final url = Uri.parse(Endpoint.register);
+
     final response = await http.post(
       url,
       headers: {"Accept": "application/json"},
@@ -35,8 +39,8 @@ class AuthAPI {
       },
     );
 
+    log("REGISTER: ${response.statusCode}");
     log(response.body);
-    log('status: ${response.statusCode}');
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return RegisterModel.fromJson(json.decode(response.body));
@@ -46,82 +50,75 @@ class AuthAPI {
     }
   }
 
+  // ================== LOGIN ==================
   static Future<RegisterModel> loginUser({
     required String email,
     required String password,
   }) async {
-    final url = Uri.parse(Endpoint.login); // Gunakan Endpoint.login
+    final url = Uri.parse(Endpoint.login);
+
     final response = await http.post(
       url,
       headers: {"Accept": "application/json"},
       body: {"email": email, "password": password},
     );
 
-    log('loginUser: ${response.statusCode}');
+    log("LOGIN: ${response.statusCode}");
     log(response.body);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      // Asumsi respons login menggunakan struktur RegisterModel
       return RegisterModel.fromJson(json.decode(response.body));
     } else {
       final error = json.decode(response.body);
-      // Pesan error di sini akan muncul di Snackbar Anda
       throw Exception(error["message"] ?? "Email atau password salah");
     }
   }
 }
 
 class TrainingAPI {
-  // Menggunakan TrainingModel untuk parse respons
+  // ================== GET TRAINING LIST ==================
   static Future<List<TrainingModelData>> getTrainings() async {
     final url = Uri.parse(Endpoint.trainings);
+
     final response = await http.get(
       url,
       headers: {"Accept": "application/json"},
     );
 
-    log('getTrainings: ${response.statusCode}');
+    log("GET Trainings: ${response.statusCode}");
     log(response.body);
 
     if (response.statusCode == 200) {
-      // 1. Gunakan model utama untuk mengurai seluruh respons
-      final trainingModel = trainingModelFromJson(response.body);
-
-      // 2. Kembalikan List data, jika null kembalikan list kosong
-      return trainingModel.data ?? [];
+      final data = trainingModelFromJson(response.body);
+      return data.data ?? [];
     } else {
-      // Tangani kesalahan jika status code bukan 200
       final error = json.decode(response.body);
-      throw Exception(error["message"] ?? "Gagal mengambil data pelatihan");
+      throw Exception(error["message"] ?? "Gagal memuat data training");
     }
   }
 
-  // Menggunakan BatchModel untuk parse respons
+  // ================== GET BATCH LIST ==================
   static Future<List<BatchModelData>> getTrainingBatches() async {
     final url = Uri.parse(Endpoint.trainingBatches);
+
     final response = await http.get(
       url,
       headers: {"Accept": "application/json"},
     );
 
-    log('getTrainingBatches: ${response.statusCode}');
+    log("GET Batches: ${response.statusCode}");
     log(response.body);
 
     if (response.statusCode == 200) {
-      // 1. Gunakan model utama untuk mengurai seluruh respons
-      final batchModel = batchModelFromJson(response.body);
-
-      // 2. Kembalikan List data, jika null kembalikan list kosong
-      return batchModel.data ?? [];
+      final data = batchModelFromJson(response.body);
+      return data.data ?? [];
     } else {
-      // Tangani kesalahan jika status code bukan 200
       final error = json.decode(response.body);
-      throw Exception(
-        error["message"] ?? "Gagal mengambil data batch pelatihan",
-      );
+      throw Exception(error["message"] ?? "Gagal memuat batch");
     }
   }
 
+  // ================== CHECK IN ==================
   static Future<AttendenceModel> checkIn({
     required String attendanceDate,
     required String CheckInTime,
@@ -132,6 +129,7 @@ class TrainingAPI {
   }) async {
     final String? token = await PreferenceHandler.getToken();
     final url = Uri.parse(Endpoint.checkin);
+
     final response = await http.post(
       url,
       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
@@ -144,14 +142,99 @@ class TrainingAPI {
         "status": status,
       },
     );
-    print(response.body);
-    print(response.statusCode);
+
+    log("CHECK IN: ${response.statusCode}");
     log(response.body);
+
     if (response.statusCode == 200) {
       return AttendenceModel.fromJson(json.decode(response.body));
     } else {
       final error = json.decode(response.body);
       throw Exception(error["message"]);
+    }
+  }
+
+  //================ CHECK - OUT ======================//
+  static Future<AttendenceModel> CheckOut({
+    required String attendanceDate,
+    required String CheckoutTime,
+    required double checkoutLat,
+    required double checkoutLng,
+    required String checkoutAddress,
+    required String status,
+  }) async {
+    final String? token = await PreferenceHandler.getToken();
+    final url = Uri.parse(Endpoint.checkout);
+
+    final response = await http.post(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+      body: {
+        "attendance_date": attendanceDate,
+        "check_in": CheckoutTime,
+        "check_in_lat": checkoutLat.toString(),
+        "check_in_lng": checkoutLng.toString(),
+        "check_in_address": checkoutAddress,
+        "status": status,
+      },
+    );
+
+    log("CHECK IN: ${response.statusCode}");
+    log(response.body);
+
+    if (response.statusCode == 200) {
+      return AttendenceModel.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"]);
+    }
+  }
+
+  // ================== GET ATTENDANCE STATS ==================
+  static Future<StatsModel> getStatsAttendence() async {
+    final url = Uri.parse(Endpoint.absenstats);
+    final String? token = await PreferenceHandler.getToken();
+
+    final response = await http.get(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
+
+    log("STATS: ${response.statusCode}");
+    log(response.body);
+
+    if (response.statusCode == 200) {
+      return statsModelFromJson(response.body);
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Gagal mengambil statistik");
+    }
+  }
+
+  // ================== GET ATTENDANCE HISTORY ==================
+  static Future<List<AttendanceHistoryModel>> getAttendanceHistory() async {
+    final String? token = await PreferenceHandler.getToken();
+    final url = Uri.parse(Endpoint.historyAbsen);
+
+    final response = await http.get(
+      url,
+      headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+    );
+
+    log("HISTORY ABSEN: ${response.statusCode}");
+    log(response.body);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonData = json.decode(response.body);
+
+      // Ambil LIST dari field "data"
+      final List list = jsonData["data"];
+
+      // Convert list ke model
+      return list.map((item) => AttendanceHistoryModel.fromJson(item)).toList();
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error["message"] ?? "Gagal mengambil riwayat absensi");
     }
   }
 }

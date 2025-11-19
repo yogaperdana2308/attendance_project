@@ -1,13 +1,15 @@
 import 'dart:async';
+
+import 'package:attendance_project/models/stats_model.dart';
+import 'package:attendance_project/preferences/preferences_handler.dart';
+import 'package:attendance_project/services/api_service.dart';
+import 'package:attendance_project/view/login_screen.dart';
 import 'package:attendance_project/widget/account_information.dart';
 import 'package:attendance_project/widget/attendence_stat.dart';
 import 'package:attendance_project/widget/attendence_today.dart';
 import 'package:attendance_project/widget/current_time.dart';
 import 'package:attendance_project/widget/greeting_header.dart';
 import 'package:flutter/material.dart';
-
-// Import widget yang sudah dipisah
-
 
 class DashboardScreenAttendence extends StatefulWidget {
   const DashboardScreenAttendence({super.key});
@@ -21,16 +23,24 @@ class _DashboardScreenAttendenceState extends State<DashboardScreenAttendence> {
   late Timer _timer;
   DateTime currentTime = DateTime.now();
 
+  StatsModel? stat;
+
+  // Data yang diambil dari SharedPreferences
+  String username = "-";
+  String training = "-";
+  String batch = "-";
+
   @override
   void initState() {
     super.initState();
 
-    // Live clock updater
+    loadUserInfo();
+
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() {
-        currentTime = DateTime.now();
-      });
+      setState(() => currentTime = DateTime.now());
     });
+
+    loadData();
   }
 
   @override
@@ -40,6 +50,43 @@ class _DashboardScreenAttendenceState extends State<DashboardScreenAttendence> {
   }
 
   String twoDigits(int n) => n.toString().padLeft(2, "0");
+
+  // 🔥 Ambil username + training + batch
+  Future<void> loadUserInfo() async {
+    final savedName = await PreferenceHandler.getUsername();
+    final savedTraining = await PreferenceHandler.getTraining();
+    final savedBatch = await PreferenceHandler.getBatch();
+
+    setState(() {
+      username = savedName ?? "-";
+      training = savedTraining ?? "-";
+      batch = savedBatch ?? "-";
+    });
+
+    print("DEBUG username = $username");
+    print("DEBUG training = $training");
+    print("DEBUG batch = $batch");
+  }
+
+  Future<void> handleLogout() async {
+    await PreferenceHandler.removeToken();
+    await PreferenceHandler.removeUsername();
+    await PreferenceHandler.removeEmail();
+    await PreferenceHandler.removeTraining();
+    await PreferenceHandler.removeBatch();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreenAttendence()),
+    );
+  }
+
+  void loadData() async {
+    final response = await TrainingAPI.getStatsAttendence();
+    setState(() {
+      stat = response;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,37 +102,48 @@ class _DashboardScreenAttendenceState extends State<DashboardScreenAttendence> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // ------------------ HEADER -------------------
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  onPressed: handleLogout,
+                  icon: Icon(Icons.logout, color: Colors.red, size: 28),
+                ),
+              ),
               GreetingHeader(
-                username: "Budi Santoso",
+                username: username,
                 subtitle: "Welcome back to your dashboard",
                 avatarUrl: "https://i.pravatar.cc/300",
               ),
 
-              const SizedBox(height: 20),
+              // HEADER
+              SizedBox(height: 20),
 
-              // ------------------ CURRENT TIME -------------------
-              CurrentTimeCard(
-                hour: hour,
-                minute: minute,
-                second: second,
-              ),
+              // CURRENT TIME
+              CurrentTimeCard(hour: hour, minute: minute, second: second),
 
               const SizedBox(height: 20),
 
-              // ------------------ ATTENDANCE TODAY -------------------
+              // ATTENDANCE TODAY
               const AttendanceTodayCard(),
 
               const SizedBox(height: 20),
 
-              // ------------------ ACCOUNT INFO -------------------
-              const AccountInformationCard(),
+              // ACCOUNT INFORMATION (DINAMIS)
+              AccountInformationCard(
+                username: username,
+                training: training,
+                batch: batch,
+              ),
 
               const SizedBox(height: 20),
 
-              // ------------------ STATISTICS -------------------
-              const AttendanceStatisticsCard(),
+              // STATISTICS
+              stat == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : AttendanceStatisticsCard(
+                      totalAbsen: stat!.data!.totalMasuk!,
+                      totalIzin: stat!.data!.totalIzin!,
+                    ),
 
               const SizedBox(height: 30),
             ],

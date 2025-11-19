@@ -2,55 +2,59 @@ import 'package:attendance_project/widget/info_row.dart';
 import 'package:flutter/material.dart';
 
 class AccountInformationCard extends StatelessWidget {
-  const AccountInformationCard({super.key});
+  final String username;
+  final String training;
+  final String batch;
+
+  const AccountInformationCard({
+    super.key,
+    required this.username,
+    required this.training,
+    required this.batch,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
+          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Account Information",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
-          const InfoRow(label: "Username", value: "budi.santoso"),
-          const Divider(height: 24),
+          // Username
+          InfoRow(label: "Username", value: username),
+          Divider(height: 24),
 
-          const InfoRow(label: "Kejuruan", value: "Teknik Informatika"),
-          const Divider(height: 24),
+          // Training
+          InfoRow(label: "Kejuruan", value: training),
+          Divider(height: 24),
 
+          // Batch
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Batch Pelatihan", style: TextStyle(fontSize: 16)),
+              Text("Batch Pelatihan", style: TextStyle(fontSize: 16)),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade100,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  "Batch 3",
+                child: Text(
+                  batch,
                   style: TextStyle(
                     color: Colors.indigo,
                     fontWeight: FontWeight.w600,

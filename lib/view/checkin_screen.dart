@@ -1,5 +1,5 @@
+import 'package:attendance_project/preferences/preferences_handler.dart';
 import 'package:attendance_project/services/api_service.dart';
-import 'package:attendance_project/widget/card_date.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -15,22 +15,49 @@ class TakeAttendenceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<TakeAttendenceScreen> {
+  bool isloadingout = false;
   bool isLoadingIn = false;
+
   GoogleMapController? mapsController;
   XFile? pickedImage;
   final ImagePicker picker = ImagePicker();
-  // GoogleMapController? _googleMapController;
+
   LatLng _currentPosition = LatLng(-6.2000, 108.816666);
   String _currentAddress = "Alamat tidak ditemukan";
 
   Marker? _marker;
 
+  // ===== STATUS CHECK-IN =====
+  String checkInStatus = "Belum Check In";
+
+  Color statusColor = Colors.red;
+  bool hasCheckedIn = false;
+  bool hascheckout = false;
+  String checkInTime = "";
+
   @override
   void initState() {
-    _getCurrentLocation();
     super.initState();
+    _getCurrentLocation();
+    _loadCheckInStatus();
   }
 
+  // ===== LOAD STATUS FROM SHAREDPREFERENCES =====
+  Future<void> _loadCheckInStatus() async {
+    final saved = await PreferenceHandler.getCheckInStatus();
+    final savedTime = await PreferenceHandler.getCheckInTime();
+
+    if (saved == "checked") {
+      setState(() {
+        checkInStatus = "Sudah Check In";
+        statusColor = Colors.green;
+        hasCheckedIn = true;
+        checkInTime = savedTime ?? "";
+      });
+    }
+  }
+
+  // ===== GET CURRENT LOCATION =====
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -55,9 +82,10 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
     _currentPosition = LatLng(position.latitude, position.longitude);
 
     List<Placemark> placemarks = await placemarkFromCoordinates(
-      _currentPosition.latitude,
-      _currentPosition.longitude,
+      position.latitude,
+      position.longitude,
     );
+
     Placemark place = placemarks[0];
 
     setState(() {
@@ -72,21 +100,41 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
 
       _currentAddress =
           "${place.name}, ${place.street}, ${place.locality}, ${place.country}, ${place.postalCode}";
-
-      mapsController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: _currentPosition, zoom: 16),
-        ),
-      );
     });
+
+    mapsController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: _currentPosition, zoom: 16),
+      ),
+    );
   }
+
+  String getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      default:
+        return "Sunday";
+    }
+  }
+
+  DateTime get today => DateTime.now();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // ========================= APP BAR =========================
       appBar: AppBar(
         backgroundColor: const Color(0xFF0A3D91),
         elevation: 0,
@@ -96,33 +144,15 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: CircleAvatar(
-              backgroundColor: Colors.yellow.shade600,
-              child: const Icon(Icons.person, color: Colors.black),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.white),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
 
-      // ========================= BODY =========================
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ---------------------- GOOGLE MAP ----------------------
+            // ===== GOOGLE MAP =====
             SizedBox(
               height: 300,
               child: GoogleMap(
@@ -131,25 +161,27 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
                   target: _currentPosition,
                   zoom: 14,
                 ),
+                markers: _marker != null ? {_marker!} : {},
+                onMapCreated: (ctrl) => mapsController = ctrl,
               ),
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-            // ---------------------- STATUS ----------------------
+            // ===== STATUS =====
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     "Status: ",
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   Text(
-                    "Belum Check In",
+                    checkInStatus,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      color: statusColor,
                     ),
                   ),
                 ],
@@ -158,20 +190,20 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
 
             const SizedBox(height: 5),
 
-            // ---------------------- ALAMAT ----------------------
+            // ===== ALAMAT =====
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     "Alamat: ",
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   Expanded(
                     child: Text(
                       _currentAddress,
-                      style: TextStyle(fontSize: 13),
+                      style: const TextStyle(fontSize: 13),
                     ),
                   ),
                 ],
@@ -180,7 +212,7 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
 
             const SizedBox(height: 18),
 
-            // ========================= CARD JAM =========================
+            // ===== CARD JAM =====
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
@@ -192,14 +224,13 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.2),
                       blurRadius: 8,
-                      spreadRadius: 1,
                       offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: Row(
                   children: [
-                    // BOX HARI
+                    // DATE BOX
                     Container(
                       height: 70,
                       width: 75,
@@ -211,7 +242,7 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            getDayName(today.weekday), // hari real-time
+                            getDayName(today.weekday),
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -219,7 +250,7 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            today.day.toString(), // tanggal real-time
+                            "${today.day}",
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -232,25 +263,25 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
 
                     const SizedBox(width: 16),
 
-                    // JAM CHECK IN & OUT
+                    // JAM CHECK IN
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Check In"),
-                          SizedBox(height: 4),
+                          const Text("Check In"),
+                          const SizedBox(height: 4),
                           Text(
-                            "07 : 50 : 00",
-                            style: TextStyle(
+                            hasCheckedIn ? checkInTime : "—",
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
-                          SizedBox(height: 12),
-                          Text("Check Out"),
-                          SizedBox(height: 4),
-                          Text(
-                            "17 : 50 : 00",
+                          const SizedBox(height: 12),
+                          const Text("Check Out"),
+                          const SizedBox(height: 4),
+                          const Text(
+                            "—",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -260,14 +291,16 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
                       ),
                     ),
 
-                    // BUTTON FOTO
+                    // CAMERA BUTTON
                     Column(
                       children: [
                         InkWell(
                           borderRadius: BorderRadius.circular(50),
-                          onTap: () {
-                            print("Ambil foto ditekan!");
-                            ImagePicker();
+                          onTap: () async {
+                            pickedImage = await picker.pickImage(
+                              source: ImageSource.camera,
+                            );
+                            setState(() {});
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
@@ -292,101 +325,150 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
 
             const SizedBox(height: 20),
 
-            // ========================= BUTTON CHECK IN =========================
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0A3D91),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () async {
-                        setState(() => isLoadingIn = true);
-
-                        try {
-                          Position pos = await Geolocator.getCurrentPosition(
-                            desiredAccuracy: LocationAccuracy.high,
-                          );
-
-                          double lat = pos.latitude;
-                          double lng = pos.longitude;
-
-                          // DATE & TIME
-                          String attendanceDate = DateFormat(
-                            "yyyy-MM-dd",
-                          ).format(DateTime.now()); // format utk API
-                          String timeNow = DateFormat(
-                            "HH:mm",
-                          ).format(DateTime.now());
-
-                          final response = await TrainingAPI.checkIn(
-                            attendanceDate: attendanceDate,
-                            CheckInTime: timeNow,
-                            checkInLat: lat,
-                            checkInLng: lng,
-                            checkInAddress: _currentAddress,
-                            status: "masuk",
-                          );
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                response.message ?? "Check-in berhasil",
-                              ),
-                            ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Gagal Check-in: $e")),
-                          );
-                        }
-
-                        setState(() => isLoadingIn = false);
-                      },
-                      child: const Text(
-                        "Check In",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
+            // ===== BUTTON CHECK IN =====
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: hasCheckedIn ? null : _handleCheckIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0A3D91),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ),
-                SizedBox(height: 12),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  child: isLoadingIn
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Check In",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
-                      ),
-                      onPressed: () {
-                        // TODO: Integrasi API CHECK Out
-                      },
-                      child: Text(
-                        "Check Out",
-                        style: TextStyle(color: Colors.red, fontSize: 16),
-                      ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: hascheckout ? null : _handleCheckout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0A3D91),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  child: isloadingout
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Check out",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                 ),
-              ],
+              ),
             ),
 
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
+  }
+
+  // ===== HANDLE CHECK IN =====
+  Future<void> _handleCheckIn() async {
+    setState(() => isLoadingIn = true);
+
+    try {
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      String attendanceDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+
+      // Format sesuai API (tanpa detik)
+      String timeNow = DateFormat("HH:mm").format(DateTime.now());
+
+      // CALL API
+      final response = await TrainingAPI.checkIn(
+        attendanceDate: attendanceDate,
+        CheckInTime: timeNow,
+        checkInLat: pos.latitude,
+        checkInLng: pos.longitude,
+        checkInAddress: _currentAddress,
+        status: "masuk",
+      );
+
+      // ————— SIMPAN STATUS (API SUKSES) —————
+      await PreferenceHandler.saveCheckInStatus("checked");
+      await PreferenceHandler.saveCheckInTime(timeNow);
+
+      setState(() {
+        hasCheckedIn = true;
+        checkInStatus = "Sudah Check In";
+        statusColor = Colors.green;
+        checkInTime = timeNow;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response.message ?? "Check-in berhasil")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal Check-in: $e")));
+    }
+
+    setState(() => isLoadingIn = false);
+  }
+
+  // CHECK OUT
+  Future<void> _handleCheckout() async {
+    setState(() => isloadingout = true);
+
+    try {
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      String attendanceDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+
+      // Format sesuai API (tanpa detik)
+      String timeNow = DateFormat("HH:mm").format(DateTime.now());
+
+      // CALL API
+      final response = await TrainingAPI.CheckOut(
+        attendanceDate: attendanceDate,
+        CheckoutTime: timeNow,
+        checkoutLat: pos.latitude,
+        checkoutLng: pos.longitude,
+        checkoutAddress: _currentAddress,
+        status: "masuk",
+      );
+
+      // ————— SIMPAN STATUS (API SUKSES) —————
+      await PreferenceHandler.saveCheckInStatus("checked");
+      await PreferenceHandler.saveCheckInTime(timeNow);
+
+      setState(() {
+        hascheckout = true;
+        checkInStatus = "Sudah Check Out";
+        statusColor = Colors.red;
+        checkInTime = timeNow;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response.message ?? "Check-out berhasil")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Gagal Check-out: $e")));
+    }
+
+    setState(() => isloadingout = false);
   }
 }

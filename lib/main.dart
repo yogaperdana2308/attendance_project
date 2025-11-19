@@ -3,10 +3,11 @@ import 'package:attendance_project/view/checkin_screen.dart';
 import 'package:attendance_project/view/login_screen.dart';
 import 'package:attendance_project/view/register_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_file.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
-  // await initializeDateFormatting('id_ID', "");
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
   runApp(const MyApp());
 }
 
@@ -19,7 +20,6 @@ class MyApp extends StatelessWidget {
         "/login_screen": (context) => LoginScreenAttendence(),
         "/register_screen": (context) => RegisterScreenAttendence(),
         "/dashboard": (context) => TakeAttendenceScreen(),
-        
       },
 
       title: 'E-Nventory',

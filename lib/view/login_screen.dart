@@ -1,10 +1,10 @@
+import 'package:attendance_project/preferences/preferences_handler.dart';
 import 'package:attendance_project/services/api_service.dart';
-import 'package:attendance_project/view/checkin_screen.dart';
+import 'package:attendance_project/view/bottom_navigasi.dart';
 import 'package:attendance_project/view/register_screen.dart';
 import 'package:attendance_project/widget/custom_button.dart';
 import 'package:attendance_project/widget/textfield.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreenAttendence extends StatefulWidget {
   const LoginScreenAttendence({super.key});
@@ -28,16 +28,36 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
 
     try {
       final result = await AuthAPI.loginUser(
-        email: emailC.text,
-        password: passC.text,
+        email: emailC.text.trim(),
+        password: passC.text.trim(),
       );
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("token", result.data?.token ?? "");
+      // ========================
+      //  SAVE TOKEN
+      // ========================
+      await PreferenceHandler.saveToken(result.data?.token ?? "");
 
+      // ========================
+      //  SAVE USERNAME + EMAIL
+      // ========================
+      final user = result.data?.user;
+
+      await PreferenceHandler.saveUsername(user?.name ?? "User");
+      await PreferenceHandler.saveEmail(user?.email ?? "-");
+
+      print("DEBUG USERNAME = ${user?.name}");
+      print("DEBUG EMAIL = ${user?.email}");
+
+      // ========================
+      //  NOTE:
+      //  API LOGIN TIDAK PUNYA TRAINING/BATCH
+      //  Jadi tidak disimpan dari login
+      // ========================
+
+      // PINDAH KE BOTTOM NAV
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => TakeAttendenceScreen()),
+        MaterialPageRoute(builder: (_) => Bottomnav()),
       );
     } catch (e) {
       ScaffoldMessenger.of(
@@ -51,7 +71,7 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffFFF2C6),
+      backgroundColor: const Color(0xffFFF2C6),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -64,8 +84,8 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
                   "Welcome Back!",
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
-                Text("Login untuk melanjutkan"),
-                SizedBox(height: 72),
+                const Text("Login untuk melanjutkan"),
+                const SizedBox(height: 72),
 
                 CustomTextField(
                   hint: 'example@gmail.com',
@@ -90,14 +110,12 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
                       v!.isEmpty ? "Password tidak boleh kosong" : null,
                 ),
 
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
 
                 CustomButton(
                   label: loading ? " " : "Login",
-                  isLoading: false,
-                  onPressed: () {
-                    loading ? null : handleLogin();
-                  },
+                  isLoading: loading,
+                  onPressed: () => loading ? null : handleLogin(),
                 ),
 
                 const SizedBox(height: 20),
@@ -113,7 +131,7 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: const [
                       Text(
                         "Belum punya akun?",
                         style: TextStyle(color: Colors.black),

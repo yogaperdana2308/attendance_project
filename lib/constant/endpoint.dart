@@ -7,4 +7,7 @@ class Endpoint {
   static const trainingBatches = '$baseUrl/batches';
   static const checkin = '$baseUrl/absen/check-in';
   static const checkout = '$baseUrl/absen/check-out';
+  static const absenstats = '$baseUrl/absen/stats';
+  static const profile = '$baseUrl/profile';
+  static const historyAbsen = '$baseUrl/absen/history';
 }

@@ -17,9 +17,9 @@ class CurrentTimeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding:  EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+      padding: EdgeInsets.symmetric(vertical: 24, horizontal: 8),
       decoration: BoxDecoration(
-        gradient:   LinearGradient(
+        gradient: LinearGradient(
           colors: [Color(0xFF7F5AF0), Color(0xFF9E7BFF)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -29,7 +29,7 @@ class CurrentTimeCard extends StatelessWidget {
           BoxShadow(
             color: Colors.deepPurple.withOpacity(0.3),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -42,24 +42,19 @@ class CurrentTimeCard extends StatelessWidget {
               SizedBox(width: 8),
               Text(
                 "Current Time",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ],
           ),
-           SizedBox(height: 20),
+          SizedBox(height: 20),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TimeBox(value: hour),
-              const Text(" : ",
-                  style: TextStyle(color: Colors.white, fontSize: 32)),
+              Text(" : ", style: TextStyle(color: Colors.white, fontSize: 32)),
               TimeBox(value: minute),
-              const Text(" : ",
-                  style: TextStyle(color: Colors.white, fontSize: 32)),
+              Text(" : ", style: TextStyle(color: Colors.white, fontSize: 32)),
               TimeBox(value: second),
             ],
           ),

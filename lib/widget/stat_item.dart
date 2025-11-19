@@ -31,7 +31,7 @@ class StatItemCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, color: iconColor, size: 30),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 Text(
                   value,
                   style: TextStyle(
@@ -44,8 +44,8 @@ class StatItemCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 6),
-        Text(label, style: const TextStyle(color: Colors.black54)),
+        SizedBox(height: 6),
+        Text(label, style: TextStyle(color: Colors.black54)),
       ],
     );
   }

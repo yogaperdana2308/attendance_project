@@ -22,26 +22,14 @@ class GreetingHeader extends StatelessWidget {
           children: [
             Text(
               "Hello, $username 👋",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
+            SizedBox(height: 4),
+            Text(subtitle, style: TextStyle(fontSize: 14, color: Colors.grey)),
           ],
         ),
-        const Spacer(),
-        CircleAvatar(
-          radius: 28,
-          backgroundImage: NetworkImage(avatarUrl),
-        ),
+        Spacer(),
+        CircleAvatar(radius: 28, backgroundImage: NetworkImage(avatarUrl)),
       ],
     );
   }

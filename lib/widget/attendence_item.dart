@@ -7,7 +7,6 @@ class AttendanceItemCard extends StatelessWidget {
   final Color bgColor;
   final Color iconColor;
   final Color textColor;
-
   const AttendanceItemCard({
     super.key,
     required this.label,

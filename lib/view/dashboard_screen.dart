@@ -102,17 +102,11 @@ class _DashboardScreenAttendenceState extends State<DashboardScreenAttendence> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  onPressed: handleLogout,
-                  icon: Icon(Icons.logout, color: Colors.red, size: 28),
-                ),
-              ),
               GreetingHeader(
                 username: username,
                 subtitle: "Welcome back to your dashboard",
                 avatarUrl: "https://i.pravatar.cc/300",
+                onLogout: handleLogout,
               ),
 
               // HEADER

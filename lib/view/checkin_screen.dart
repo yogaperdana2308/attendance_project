@@ -22,37 +22,51 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
   XFile? pickedImage;
   final ImagePicker picker = ImagePicker();
 
-  LatLng _currentPosition = LatLng(-6.2000, 108.816666);
+  LatLng _currentPosition = const LatLng(-6.2000, 108.816666);
   String _currentAddress = "Alamat tidak ditemukan";
 
   Marker? _marker;
 
-  // ===== STATUS CHECK-IN =====
+  // ===== STATUS CHECK-IN / CHECK-OUT =====
   String checkInStatus = "Belum Check In";
 
   Color statusColor = Colors.red;
   bool hasCheckedIn = false;
-  bool hascheckout = false;
+  bool hasCheckedOut = false;
   String checkInTime = "";
+  String checkOutTime = "";
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
-    _loadCheckInStatus();
+    _loadAttendanceStatus();
   }
 
-  // ===== LOAD STATUS FROM SHAREDPREFERENCES =====
-  Future<void> _loadCheckInStatus() async {
-    final saved = await PreferenceHandler.getCheckInStatus();
-    final savedTime = await PreferenceHandler.getCheckInTime();
+  // ===== LOAD STATUS DARI SHAREDPREFERENCES (Digabung) =====
+  Future<void> _loadAttendanceStatus() async {
+    final savedIn = await PreferenceHandler.getCheckInStatus();
+    final savedInTime = await PreferenceHandler.getCheckInTime();
+    final savedOut = await PreferenceHandler.getCheckOutStatus();
+    final savedOutTime = await PreferenceHandler.getCheckOutTime();
 
-    if (saved == "checked") {
+    if (savedIn == "checked") {
       setState(() {
-        checkInStatus = "Sudah Check In";
-        statusColor = Colors.green;
         hasCheckedIn = true;
-        checkInTime = savedTime ?? "";
+        checkInTime = savedInTime ?? "—";
+
+        hasCheckedOut = savedOut == "checked";
+        checkOutTime = savedOutTime ?? "—";
+        checkOutTime = "—";
+
+        // Tentukan status dan warna berdasarkan status Check In dan Check Out
+        if (hasCheckedOut) {
+          checkInStatus = "Sudah Check Out";
+          statusColor = Colors.red;
+        } else {
+          checkInStatus = "Sudah Check In";
+          statusColor = Colors.green;
+        }
       });
     }
   }
@@ -263,7 +277,7 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
 
                     const SizedBox(width: 16),
 
-                    // JAM CHECK IN
+                    // JAM CHECK IN/OUT
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,8 +294,8 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
                           const SizedBox(height: 12),
                           const Text("Check Out"),
                           const SizedBox(height: 4),
-                          const Text(
-                            "—",
+                          Text(
+                            hasCheckedOut ? checkOutTime : "—",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -348,12 +362,16 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
                 ),
               ),
             ),
+
+            // ===== BUTTON CHECK OUT =====
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: hascheckout ? null : _handleCheckout,
+                  onPressed: !hasCheckedIn || hasCheckedOut
+                      ? null
+                      : _handleCheckout,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0A3D91),
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -371,7 +389,7 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
               ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -388,8 +406,6 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
       );
 
       String attendanceDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
-
-      // Format sesuai API (tanpa detik)
       String timeNow = DateFormat("HH:mm").format(DateTime.now());
 
       // CALL API
@@ -425,8 +441,15 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
     setState(() => isLoadingIn = false);
   }
 
-  // CHECK OUT
+  // ===== HANDLE CHECK OUT =====
   Future<void> _handleCheckout() async {
+    if (!hasCheckedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Harap Check In terlebih dahulu")),
+      );
+      return;
+    }
+
     setState(() => isloadingout = true);
 
     try {
@@ -435,8 +458,6 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
       );
 
       String attendanceDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
-
-      // Format sesuai API (tanpa detik)
       String timeNow = DateFormat("HH:mm").format(DateTime.now());
 
       // CALL API
@@ -446,18 +467,18 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
         checkoutLat: pos.latitude,
         checkoutLng: pos.longitude,
         checkoutAddress: _currentAddress,
-        status: "masuk",
+        status: "keluar",
       );
 
       // ————— SIMPAN STATUS (API SUKSES) —————
-      await PreferenceHandler.saveCheckInStatus("checked");
-      await PreferenceHandler.saveCheckInTime(timeNow);
+      await PreferenceHandler.saveCheckOutStatus("checked");
+      await PreferenceHandler.saveCheckOutTime(timeNow);
 
       setState(() {
-        hascheckout = true;
+        hasCheckedOut = true;
         checkInStatus = "Sudah Check Out";
         statusColor = Colors.red;
-        checkInTime = timeNow;
+        checkOutTime = timeNow;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

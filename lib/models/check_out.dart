@@ -1,17 +1,24 @@
+// To parse this JSON data, do
+//
+//     final checkOutModel = checkOutModelFromJson(jsonString);
 
 import 'dart:convert';
 
-CheckOut checkOutFromJson(String str) => CheckOut.fromJson(json.decode(str));
+CheckOutModel checkOutModelFromJson(String str) =>
+    CheckOutModel.fromJson(json.decode(str));
 
-String checkOutToJson(CheckOut data) => json.encode(data.toJson());
+String checkOutModelToJson(CheckOutModel data) => json.encode(data.toJson());
 
-class CheckOut {
+class CheckOutModel {
   String? message;
   Data? data;
 
-  CheckOut({this.message, this.data});
+  CheckOutModel({this.message, this.data});
 
-  factory CheckOut.fromJson(Map<String, dynamic> json) => CheckOut(
+  CheckOutModel copyWith({String? message, Data? data}) =>
+      CheckOutModel(message: message ?? this.message, data: data ?? this.data);
+
+  factory CheckOutModel.fromJson(Map<String, dynamic> json) => CheckOutModel(
     message: json["message"],
     data: json["data"] == null ? null : Data.fromJson(json["data"]),
   );
@@ -43,6 +50,30 @@ class Data {
     this.status,
     this.alasanIzin,
   });
+
+  Data copyWith({
+    int? id,
+    DateTime? attendanceDate,
+    String? checkInTime,
+    String? checkOutTime,
+    String? checkInAddress,
+    String? checkOutAddress,
+    String? checkInLocation,
+    String? checkOutLocation,
+    String? status,
+    dynamic alasanIzin,
+  }) => Data(
+    id: id ?? this.id,
+    attendanceDate: attendanceDate ?? this.attendanceDate,
+    checkInTime: checkInTime ?? this.checkInTime,
+    checkOutTime: checkOutTime ?? this.checkOutTime,
+    checkInAddress: checkInAddress ?? this.checkInAddress,
+    checkOutAddress: checkOutAddress ?? this.checkOutAddress,
+    checkInLocation: checkInLocation ?? this.checkInLocation,
+    checkOutLocation: checkOutLocation ?? this.checkOutLocation,
+    status: status ?? this.status,
+    alasanIzin: alasanIzin ?? this.alasanIzin,
+  );
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     id: json["id"],

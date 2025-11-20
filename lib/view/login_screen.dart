@@ -32,13 +32,20 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
         password: passC.text.trim(),
       );
 
+      // ======================================================
+      // 💡 PERBAIKAN UTAMA: HAPUS STATUS KEHADIRAN LAMA
+      // Ini mencegah status Check In/Out user sebelumnya terbawa.
+      // Harus dipanggil setelah API sukses, sebelum menyimpan data user baru.
+      // ======================================================
+      await PreferenceHandler.removeAllAttendanceStatus();
+
       // ========================
-      //  SAVE TOKEN
+      //  SAVE TOKEN
       // ========================
       await PreferenceHandler.saveToken(result.data?.token ?? "");
 
       // ========================
-      //  SAVE USERNAME + EMAIL
+      //  SAVE USERNAME + EMAIL
       // ========================
       final user = result.data?.user;
 
@@ -48,16 +55,10 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
       print("DEBUG USERNAME = ${user?.name}");
       print("DEBUG EMAIL = ${user?.email}");
 
-      // ========================
-      //  NOTE:
-      //  API LOGIN TIDAK PUNYA TRAINING/BATCH
-      //  Jadi tidak disimpan dari login
-      // ========================
-
       // PINDAH KE BOTTOM NAV
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => Bottomnav()),
+        MaterialPageRoute(builder: (_) => const Bottomnav()),
       );
     } catch (e) {
       ScaffoldMessenger.of(
@@ -129,9 +130,9 @@ class _LoginScreenAttendenceState extends State<LoginScreenAttendence> {
                       ),
                     );
                   },
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text(
                         "Belum punya akun?",
                         style: TextStyle(color: Colors.black),

@@ -171,15 +171,15 @@ class TrainingAPI {
       headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       body: {
         "attendance_date": attendanceDate,
-        "check_in": CheckoutTime,
-        "check_in_lat": checkoutLat.toString(),
-        "check_in_lng": checkoutLng.toString(),
-        "check_in_address": checkoutAddress,
+        "check_out": CheckoutTime,
+        "check_out_lat": checkoutLat.toString(),
+        "check_out_lng": checkoutLng.toString(),
+        "check_out_address": checkoutAddress,
         "status": status,
       },
     );
 
-    log("CHECK IN: ${response.statusCode}");
+    log("CHECK OUT: ${response.statusCode}");
     log(response.body);
 
     if (response.statusCode == 200) {

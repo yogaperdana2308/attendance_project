@@ -29,10 +29,7 @@ class AttendanceTodayCard extends StatelessWidget {
               SizedBox(width: 8),
               Text(
                 "Attendance Today",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ],
           ),

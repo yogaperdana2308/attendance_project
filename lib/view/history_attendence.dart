@@ -156,14 +156,14 @@ class _HistoryAttendenceScreenState extends State<HistoryAttendenceScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              const Icon(Icons.login, size: 18, color: Colors.grey),
-              const SizedBox(width: 6),
+              Icon(Icons.login, size: 18, color: Colors.green),
+              SizedBox(width: 6),
               Text(
                 "Masuk: $masuk",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 16),
-              const Icon(Icons.logout, size: 18, color: Colors.grey),
+              const Icon(Icons.logout, size: 18, color: Colors.red),
               const SizedBox(width: 6),
               Text(
                 "Keluar: $keluar",

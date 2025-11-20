@@ -11,7 +11,79 @@ class PreferenceHandler {
   static const String batchKey = "batch";
 
   // ========================
-  // LOGIN STATUS
+  // CHECK-IN STATUS
+  // ========================
+  static const String checkInStatusKey = "checkin_status";
+  static const String checkInTimeKey = "checkin_time";
+
+  static saveCheckInStatus(String status) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(checkInStatusKey, status);
+  }
+
+  static Future<String?> getCheckInStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(checkInStatusKey);
+  }
+
+  static saveCheckInTime(String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(checkInTimeKey, time);
+  }
+
+  static Future<String?> getCheckInTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(checkInTimeKey);
+  }
+
+  static removeCheckInStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(checkInStatusKey);
+  }
+
+  static removeCheckInTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(checkInTimeKey);
+  }
+
+  // ========================
+  // CHECK-OUT STATUS (BARU)
+  // ========================
+  static const String checkOutStatusKey = "checkout_status";
+  static const String checkOutTimeKey = "checkout_time";
+
+  static saveCheckOutStatus(String status) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(checkOutStatusKey, status);
+  }
+
+  static Future<String?> getCheckOutStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(checkOutStatusKey);
+  }
+
+  static saveCheckOutTime(String time) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(checkOutTimeKey, time);
+  }
+
+  static Future<String?> getCheckOutTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(checkOutTimeKey);
+  }
+
+  static removeCheckOutStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(checkOutStatusKey);
+  }
+
+  static removeCheckOutTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(checkOutTimeKey);
+  }
+
+  // ========================
+  // UTILITY LAINNYA
   // ========================
   static saveLogin(bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -28,9 +100,6 @@ class PreferenceHandler {
     prefs.remove(isLogin);
   }
 
-  // ========================
-  // TOKEN
-  // ========================
   static saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(tokenKey, token);
@@ -46,9 +115,6 @@ class PreferenceHandler {
     prefs.remove(tokenKey);
   }
 
-  // ========================
-  // USERNAME
-  // ========================
   static saveUsername(String name) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(usernameKey, name);
@@ -64,9 +130,6 @@ class PreferenceHandler {
     prefs.remove(usernameKey);
   }
 
-  // ========================
-  // EMAIL
-  // ========================
   static saveEmail(String email) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(emailKey, email);
@@ -82,9 +145,6 @@ class PreferenceHandler {
     prefs.remove(emailKey);
   }
 
-  // ========================
-  // TRAINING
-  // ========================
   static saveTraining(String training) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(trainingKey, training);
@@ -100,9 +160,6 @@ class PreferenceHandler {
     prefs.remove(trainingKey);
   }
 
-  // ========================
-  // BATCH
-  // ========================
   static saveBatch(String batch) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(batchKey, batch);
@@ -118,41 +175,11 @@ class PreferenceHandler {
     prefs.remove(batchKey);
   }
 
-  // di PreferenceHandler (file preferences_handler.dart)
-  static const String checkInStatusKey = "checkin_status";
-  static const String checkInTimeKey = "checkin_time";
-
-  // SIMPAN STATUS CHECK-IN (contoh value: "checked" / "unchecked")
-  static saveCheckInStatus(String status) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(checkInStatusKey, status);
-  }
-
-  // GET STATUS CHECK-IN
-  static Future<String?> getCheckInStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(checkInStatusKey);
-  }
-
-  // REMOVE STATUS (logout / reset)
-  static removeCheckInStatus() async {
+  static removeAllAttendanceStatus() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(checkInStatusKey);
-  }
-
-  // (opsional) simpan waktu check-in
-  static saveCheckInTime(String time) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(checkInTimeKey, time);
-  }
-
-  static Future<String?> getCheckInTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(checkInTimeKey);
-  }
-
-  static removeCheckInTime() async {
-    final prefs = await SharedPreferences.getInstance();
     prefs.remove(checkInTimeKey);
+    prefs.remove(checkOutStatusKey);
+    prefs.remove(checkOutTimeKey);
   }
 }

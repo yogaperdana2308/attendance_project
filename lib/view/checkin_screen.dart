@@ -433,9 +433,15 @@ class _AttendanceScreenState extends State<TakeAttendenceScreen> {
         SnackBar(content: Text(response.message ?? "Check-in berhasil")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Gagal Check-in: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            "Gagal Check-in: $e",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
     }
 
     setState(() => isLoadingIn = false);
